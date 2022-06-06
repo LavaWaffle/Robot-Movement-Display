@@ -1,0 +1,108 @@
+<!-- Import bootstrap -->
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<!-- Title of page -->
+{% block title %}
+Draw Robot Movement
+{% endblock %}
+
+<!-- Content of page -->
+{% block content %}
+
+  <!-- DOM element for desmos calculator -->
+  <div id="calculator" style="width: 100%s; height: 100vh;"></div>
+  
+
+{% endblock %}
+
+<!-- Scripts of page -->
+{% block scripts %}
+{{ super() }}
+<!-- Import desmos api -->
+<script src="https://www.desmos.com/api/v1.7/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+<script>
+  // Grab the calculator element from the DOM.
+  var elt = document.getElementById('calculator');
+  // Initialize a Desmos calculator.
+  var calculator = Desmos.GraphingCalculator(elt, options={
+    zoomFit: true,
+    keypad: true,
+  });
+
+  // Grab the xlsx file from python
+  let file = '{{ xlsx_file }}';
+  // Convert string to dictionary (in js single quotes turn to &#39;, so to fix this we use a split and a join)
+  file = JSON.parse(file.split('&#39;').join('"'));
+  // Grab keys from dictionary
+  const fileKeys = Object.keys(file);
+  // Log the keys
+  console.log(fileKeys);
+
+  // Add rotation variable to desmos
+  calculator.setExpression({ id: 'aVal', latex: 'a=0\\pi', sliderBounds: { min: '0', max: '2\\pi' } });
+  // Add a comment for 'a'
+  calculator.setExpression({ id: 'bVal', latex: 'A = rotation' });
+  
+  // Add labels for what the rotation should be to get a desired output
+  calculator.setExpression({ id: 'aForward', latex: '(0, 100)', label: 'Forward (a = 0)', showLabel: true});
+  calculator.setExpression({ id: 'aLeft', latex: '(-100, 0)', label: 'Left (a = pi/2)', showLabel: true});
+  calculator.setExpression({ id: 'aBack', latex: '(0, -100)', label: 'Backward (a = pi)', showLabel: true});
+  calculator.setExpression({ id: 'aRight', latex: '(100, 0)', label: 'Right (a = 3pi/2)', showLabel: true});
+
+  // Define cos and sin functions
+  const cos = '\\cos\\left(a\\right)'
+  const sin = '\\sin\\left(a\\right)'
+
+  // Loop through xlsx file
+  file[fileKeys[0]].map((time, row) => {
+    // Grab the x and y from the xlsx file
+    const x = file[fileKeys[2]][row];
+    const y = file[fileKeys[3]][row];
+    // Log the x and y
+    console.log(x, y);
+    // Add the point to desmos
+    calculator.setExpression({ 
+      // Id must be unique
+      id: time, 
+      // Add the x and y to desmos
+      latex: getRotate(x, y, sin, cos), 
+      // Set the color based off the row
+      color: rowToRgb(row)
+    });
+  })
+
+  // Return a point that can be rotated according to the rotation variable
+  function getRotate(x, y, sin, cos) {
+    return `(${x}${cos}-${y}${sin}, ${y}${cos}+${x}${sin})`;
+  }
+
+  // Convert to base 16
+  function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+  }
+  
+  // Convert rgb to hex
+  function rgbToHex(r, g, b) {  
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  }
+  
+  // Turn int (row) into an rgb value
+  function rowToRgb(row) {
+    row = row % 255*3;
+    let r=0, g=0, b=0;
+    if (row < 255) {
+      r = row;
+    } else if (row < 255 + 255) {
+      r = 255;
+      g = row - 255;
+    } else {
+      r = 255;
+      g = 255;
+      b = row - 255 - 255;
+    }
+    return rgbToHex(r, g, b);
+  }
+</script>
+{% endblock %}

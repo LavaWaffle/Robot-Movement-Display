@@ -1,0 +1,4 @@
+flask
+Flask-WTF==1.0.1
+Flask-Bootstrap4==4.0.2
+pandas==1.4.2

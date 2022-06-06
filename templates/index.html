@@ -1,0 +1,41 @@
+<!-- Import bootstrap -->
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<!-- Styles of page -->
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+<!-- Title of page -->
+{% block title %}
+Input File
+{% endblock %}
+
+<!-- Content of page -->
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+      <h1 class="pt-5 pb-2">Input your XLSX file</h1>
+      <!-- Create html form using python data -->
+      {{ wtf.quick_form(form) }}
+      
+      <!-- Display any errors from the form -->
+      {% if message|length > 0 %}
+        <p class="pt-5"><strong>Error(s)</strong></p>
+      {% endif %}
+      
+      {% for key, values in message.items() %}
+        <span>{{key}}:</span>
+        {% for value in values %}
+          <span>{{value}}</span>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
