@@ -6,8 +6,8 @@ A Flask app that displays a robot's movement through desmos.
 
 1. Clone the repository.
 ```bash
-git clone ${TO DO: Add link to repo}
-cd ${Robot-Movement-Display}
+git clone https://github.com/LavaWaffle/Robot-Movement-Display.git
+cd Robot-Movement-Display
 ```
 
 2. Install the libraries
